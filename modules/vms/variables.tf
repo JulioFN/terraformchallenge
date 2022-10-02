@@ -23,3 +23,8 @@ variable "key_path"{
     type = string
     default = "~/.ssh/id_rsa.pub"
 }
+
+variable "disk_id_to_attach" {
+    type = string
+    default = null
+}

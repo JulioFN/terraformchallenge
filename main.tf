@@ -83,13 +83,5 @@ module "azurevms" {
   azure_snet_id = one(azurerm_virtual_network.new_vnet.subnet[*].id)
   suffix = "${count.index}"
   key_path = var.key_path
-
-}
-
-resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
-  for_each = module.azurevms
-  managed_disk_id    = azurerm_managed_disk.apache_data.id
-  virtual_machine_id = each.value
-  lun                = "10"
-  caching            = "ReadWrite"
+  disk_id_to_attach = azurerm_managed_disk.apache_data.id
 }

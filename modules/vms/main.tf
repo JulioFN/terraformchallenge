@@ -37,3 +37,11 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+
+
+resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
+  managed_disk_id    = var.disk_id_to_attach
+  virtual_machine_id = azurerm_linux_virtual_machine.vm.id
+  lun                = "10"
+  caching            = "ReadWrite"
+}
