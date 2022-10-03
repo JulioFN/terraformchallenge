@@ -87,6 +87,7 @@ module "azurevms" {
   azure_snet_id = one(azurerm_virtual_network.new_vnet.subnet[*].id)
   suffix = "${count.index}"
   key_path = var.key_path
+  cert_path = var.cert_path
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {

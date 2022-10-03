@@ -19,7 +19,12 @@ variable "suffix" {
     nullable = false
 }
 
+variable "cert_path"{
+    type = string
+    default = "./id_rsa.pub"
+}
+
 variable "key_path"{
     type = string
-    default = "~/.ssh/id_rsa.pub"
+    default = "./id_rsa"
 }

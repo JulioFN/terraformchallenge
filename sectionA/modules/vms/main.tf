@@ -22,7 +22,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = "adminuser"
-    public_key = file(var.key_path)
+    public_key = file(var.cert_path)
   }
 
   os_disk {
@@ -35,5 +35,20 @@ resource "azurerm_linux_virtual_machine" "vm" {
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts-gen2"
     version   = "latest"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["sudo apt update", "sudo apt install python3 -y", "echo Done!"]
+
+    connection {
+      host        = azurerm_network_interface.nic.private_ip_address
+      type        = "ssh"
+      user        = "adminuser"
+      private_key = file(var.key_path)
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser -i '${azurerm_network_interface.nic.private_ip_address},' --private-key ${var.key_path} -e 'pub_key=${var.cert_path}' ${path.module}../playbooks/apache-install.yml; echo ${var.cert_path}; echo ${path.module}"
   }
 }

@@ -40,10 +40,16 @@ variable "instance_count" {
   default     = 3
 }
 
+variable "cert_path" {
+    description = "The path to a cert file for the admin user created on provisioned machines."
+    type = string
+    default = "./id_rsa.pub"
+}
+
 variable "key_path" {
     description = "The path to a key file for the admin user created on provisioned machines."
     type = string
-    default = "./id_rsa.pub"
+    default = "./id_rsa"
 }
 
 variable "frontend_ip_configuration_name" {
