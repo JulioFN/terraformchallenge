@@ -45,3 +45,8 @@ variable "key_path" {
     type = string
     default = "./id_rsa.pub"
 }
+
+variable "frontend_ip_configuration_name" {
+    type = string
+    default = "InternalIP"
+}

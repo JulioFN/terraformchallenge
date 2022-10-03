@@ -14,12 +14,7 @@ variable "azure_snet_id" {
     nullable = false
 }
 
-variable "suffix" {
+variable "frontend_ip_configuration_name" {
     type = string
     nullable = false
-}
-
-variable "key_path"{
-    type = string
-    default = "~/.ssh/id_rsa.pub"
 }

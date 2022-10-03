@@ -71,6 +71,10 @@ resource "azurerm_managed_disk" "apache_data" {
   storage_account_type = "Premium_LRS"
   disk_size_gb = 32
   max_shares = 3
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 module "azurevms" {
@@ -83,5 +87,47 @@ module "azurevms" {
   azure_snet_id = one(azurerm_virtual_network.new_vnet.subnet[*].id)
   suffix = "${count.index}"
   key_path = var.key_path
-  disk_id_to_attach = azurerm_managed_disk.apache_data.id
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
+  count = var.instance_count
+  
+  managed_disk_id    = azurerm_managed_disk.apache_data.id
+  virtual_machine_id = module.azurevms[count.index].vm_id
+  lun                = "10"
+  caching            = "ReadWrite"
+}
+
+module "azurelbs" {
+  source = "./modules/lbs"
+  
+  azure_region_name = azurerm_resource_group.challenge_rg.location
+  azure_resource_group_name = azurerm_resource_group.challenge_rg.name
+  azure_snet_id = one(azurerm_virtual_network.new_vnet.subnet[*].id)
+  frontend_ip_configuration_name = var.frontend_ip_configuration_name
+}
+
+
+resource "azurerm_lb_backend_address_pool" "lb_address_pool" {
+    loadbalancer_id = module.azurelbs.lb_id
+    name = "BackendAddressPool"
+}
+
+resource "azurerm_lb_backend_address_pool_address" "lb_address_pool_addresses" {
+  count = var.instance_count
+
+  backend_address_pool_id = azurerm_lb_backend_address_pool.lb_address_pool.id
+  virtual_network_id = azurerm_virtual_network.new_vnet.id
+  name = "backendpooladdress${count.index}"
+  ip_address = module.azurevms[count.index].vm_ip
+}
+
+resource "azurerm_lb_rule" "lb_rule" {
+  backend_port = 80
+  frontend_ip_configuration_name = var.frontend_ip_configuration_name
+  frontend_port = 80
+  loadbalancer_id = module.azurelbs.lb_id
+  name = "lbRulePort80"
+  protocol = "All"
+  backend_address_pool_ids = [ azurerm_lb_backend_address_pool.lb_address_pool.id ]
 }
