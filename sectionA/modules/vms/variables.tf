@@ -21,10 +21,10 @@ variable "suffix" {
 
 variable "cert_path"{
     type = string
-    default = "./id_rsa.pub"
+    nullable = false
 }
 
 variable "key_path"{
     type = string
-    default = "./id_rsa"
+    nullable = false
 }

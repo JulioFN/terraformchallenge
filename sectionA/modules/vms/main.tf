@@ -49,6 +49,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser -i '${azurerm_network_interface.nic.private_ip_address},' --private-key ${var.key_path} -e 'pub_key=${var.cert_path}' ${path.module}../playbooks/apache-install.yml; echo ${var.cert_path}; echo ${path.module}"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser -i '${azurerm_network_interface.nic.private_ip_address},' --private-key ${var.key_path} -e 'pub_key=${var.cert_path}' apache-install.yml"
   }
 }
