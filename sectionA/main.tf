@@ -44,7 +44,7 @@ resource "azurerm_network_security_group" "vms_nsg" {
     name = "ssh-cidr"
     priority = 101
     protocol = "Tcp"
-    source_address_prefix = var.virtual_machines_snet_prefix
+    source_address_prefix = var.ssh_ip_or_cidr
     source_port_range = "*"
   }
 
@@ -88,6 +88,7 @@ module "azurevms" {
   suffix = "${count.index}"
   key_path = var.key_path
   cert_path = var.cert_path
+  vm_sku = var.vm_sku
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
@@ -96,7 +97,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
   managed_disk_id    = azurerm_managed_disk.apache_data.id
   virtual_machine_id = module.azurevms[count.index].vm_id
   lun                = "10"
-  caching            = "ReadWrite"
+  caching            = "None"
 }
 
 module "azurelbs" {
@@ -129,6 +130,6 @@ resource "azurerm_lb_rule" "lb_rule" {
   frontend_port = 80
   loadbalancer_id = module.azurelbs.lb_id
   name = "lbRulePort80"
-  protocol = "All"
+  protocol = "Tcp"
   backend_address_pool_ids = [ azurerm_lb_backend_address_pool.lb_address_pool.id ]
 }

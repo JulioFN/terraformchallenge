@@ -56,3 +56,13 @@ variable "frontend_ip_configuration_name" {
     type = string
     default = "InternalIP"
 }
+
+variable "ssh_ip_or_cidr" {
+    type = string
+    default = "10.0.0.0/16"
+}
+
+variable "vm_sku" {
+    type = string
+    default = "Standard_D2as_v4"
+}

@@ -28,3 +28,8 @@ variable "key_path"{
     type = string
     nullable = false
 }
+
+variable "vm_sku" {
+    type = string
+    default = "Standard_D2as_v4"
+}
