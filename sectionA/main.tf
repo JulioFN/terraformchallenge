@@ -98,6 +98,10 @@ resource "azurerm_virtual_machine_data_disk_attachment" "attachment" {
   virtual_machine_id = module.azurevms[count.index].vm_id
   lun                = "10"
   caching            = "None"
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser -i '${module.azurevms[count.index].vm_public_ip},' --private-key ${var.key_path} -e 'pub_key=${var.cert_path}' mount-disk-ubuntu.yml"
+  }
 }
 
 module "azurelbs" {
@@ -121,7 +125,7 @@ resource "azurerm_lb_backend_address_pool_address" "lb_address_pool_addresses" {
   backend_address_pool_id = azurerm_lb_backend_address_pool.lb_address_pool.id
   virtual_network_id = azurerm_virtual_network.new_vnet.id
   name = "backendpooladdress${count.index}"
-  ip_address = module.azurevms[count.index].vm_ip
+  ip_address = module.azurevms[count.index].vm_private_ip
 }
 
 resource "azurerm_lb_rule" "lb_rule" {

@@ -1,0 +1,50 @@
+- become: yes
+  hosts: all
+  name: mount-disk-ubuntu
+  collections:
+    - community.general
+  tasks:
+    - name: Get disk path
+      shell: |
+        echo $(readlink -f /dev/disk/azure/scsi1/lun10)
+      register: disk
+
+    - name: use parted to make partition
+      community.general.parted:
+        device: "{{ disk.stdout }}"
+        number: 1
+        state: present
+        fs_type: xfs
+
+    - name: Inform the OS of partition table changes (partprobe)
+      command: partprobe
+
+    - name: Make filesystem
+      community.general.filesystem:
+        device: "{{ disk.stdout }}1"
+        fstype: xfs
+
+    - name: inform the OS of partition table changes (partprobe)
+      command: partprobe
+
+    - name: Get UUID of the new filesystem
+      shell: |
+        blkid -s UUID -o value $(readlink -f /dev/disk/azure/scsi1/lun10-part1)
+      register: uuid
+
+    - name: show real uuid
+      debug:
+        msg: "{{ uuid.stdout }}"
+
+    - name: mount the dir
+      mount:
+        path: /var/www/html
+        src: "UUID={{ uuid.stdout }}"
+        fstype: xfs
+        state: mounted
+
+    - name: check disk status
+      shell: df -h | grep /dev/sd
+      register: df2_status
+
+    - debug: var=df2_status.stdout_lines
