@@ -77,6 +77,13 @@ resource "azurerm_managed_disk" "apache_data" {
   }
 }
 
+resource "azurerm_management_lock" "apache_data_lock" {
+  name       = "apache-lock"
+  scope      = azurerm_managed_disk.apache_data.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because it's Apache's files"
+}
+
 module "azurevms" {
   source = "./modules/vms"
 
