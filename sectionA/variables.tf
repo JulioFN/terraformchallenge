@@ -35,7 +35,7 @@ variable "network_security_group_name" {
 }
 
 variable "instance_count" {
-  description = "Number of instances to provision."
+  description = "Number of instances to provision. If more than 3, can create problems with disk max shares. Check if better sku is needed."
   type        = number
   default     = 3
 }
@@ -64,5 +64,5 @@ variable "ssh_ip_or_cidr" {
 
 variable "vm_sku" {
     type = string
-    default = "Standard_D2as_v4"
+    default = "Standard_B1ms"
 }
