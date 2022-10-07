@@ -1,0 +1,72 @@
+- hosts: all
+  name: Postgresql Playbook
+  become: yes
+  vars:
+    postgres_password: sample
+  collections:
+    - community.docker
+  tasks:
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+          - postgresql-client-14
+        state: latest
+        update_cache: true
+    - name: Install docker
+      apt:
+        name: docker.io
+        state: latest
+        update_cache: true
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+        
+    - name: Pull Postgresql Docker image
+      community.docker.docker_image:
+        name: "postgres:14"
+        source: pull
+
+    - name: Create mounting folder
+      file:
+        path: /tmp/storage
+        state: directory
+        owner: root
+        group: root
+        mode: 0775
+
+    - name: Create postgresql container
+      community.docker.docker_container:
+        name: postgresql
+        image: "postgres:14"    
+        network_mode: bridge
+        exposed_ports:
+          - 5432
+        published_ports:
+          - 5432:5432
+        state: started
+        env:
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+        volumes:
+          - /tmp/storage:/var/lib/postgresql/data
+
+    - name: Backup the initial database
+      community.docker.docker_container_exec:
+        container: postgresql
+        env:
+          PGPASSWORD: "{{ postgres_password }}"
+        command: pg_dumpall -U postgres -f postgres.backup
+        chdir: /root
+
+    - name: Automate backups from database
+      cron:
+        name: Backup database
+        minute: "17"
+        hour: "2"
+        job: docker exec postgresql PGPASSWORD="sample" pg_dumpall -U postgres -f /root/postgres.backup
