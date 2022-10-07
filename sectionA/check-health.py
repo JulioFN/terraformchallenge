@@ -1,9 +1,11 @@
 import sys, requests, json, socket, paramiko
 
+human_output = True
+
+
 hosts = []
 if len(sys.argv) == 2:
     hosts = sys.argv[1].split(",")
-human_output = True
 hosts_with_errors = []
 
 def check_webserver(ip):
@@ -57,7 +59,8 @@ for host in hosts:
         ssh_reachable = is_ssh_reachable(host)
         hosts_with_errors.append({"host": host, "ssh_reachable": ssh_reachable})
 
-print("Hosts with errors:")
+if human_output:
+    print("Hosts with errors:")
 print(hosts_with_errors)
 
 
