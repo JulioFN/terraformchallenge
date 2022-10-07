@@ -18,7 +18,7 @@ To run the playbook that orchestrates a docker container, performs a backup and 
 ```
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser -i '<ip_from_one_of_the_vms_deployed>,' --private-key ./id_rsa -e 'pub_key=./id_rsa.pub' postgres-playbook.yml
 ```
-
+This playbook was originally tested in a Ubuntu Server 22.04 from Azure.
 ## Section C
 A python script was done to check if it can do a http get request in the host provided. If it fails, tries to check if ssh is open. It outputs a list of objects that had errors. You can use this script by running it like:
 ```
